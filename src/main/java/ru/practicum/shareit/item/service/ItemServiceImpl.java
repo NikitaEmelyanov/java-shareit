@@ -1,5 +1,8 @@
 package ru.practicum.shareit.item.service;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,19 +13,16 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateRequestDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dao.UserMemoryRepository;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
+
     private final ItemRepository itemRepository;
-    private final UserMemoryRepository userMemoryRepository;
+    private final UserRepository userRepository;
 
     @Override
     public ItemDto addItem(ItemDto itemDto, Long userId) {
@@ -36,7 +36,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(Long itemId, Long userId, ItemUpdateRequestDto itemDto) {
-        log.debug("Метод сервиса. Обновление вещи с id {} пользователем с id {}, данные обновления: {}",
+        log.debug(
+            "Метод сервиса. Обновление вещи с id {} пользователем с id {}, данные обновления: {}",
             itemId, userId, itemDto);
         getUserOrThrow(userId);
         Item item = getItemOrThrow(itemId);
@@ -44,9 +45,15 @@ public class ItemServiceImpl implements ItemService {
             throw new ForbiddenException("У вас нет доступа к ресурсу");
         }
 
-        if (checkStringNotNullAndNotEmpty(itemDto.getName())) item.setName(itemDto.getName());
-        if (checkStringNotNullAndNotEmpty(itemDto.getDescription())) item.setDescription(itemDto.getDescription());
-        if (itemDto.getAvailable() != null) item.setAvailable(itemDto.getAvailable());
+        if (checkStringNotNullAndNotEmpty(itemDto.getName())) {
+            item.setName(itemDto.getName());
+        }
+        if (checkStringNotNullAndNotEmpty(itemDto.getDescription())) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
+        }
 
         itemRepository.update(item);
         return ItemMapper.toItemDto(item);
@@ -79,9 +86,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private User getUserOrThrow(Long userId) {
-        return userMemoryRepository
+        return userRepository
             .getUser(userId)
-            .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + "не найден!"));
+            .orElseThrow(
+                () -> new NotFoundException("Пользователь с id = " + userId + "не найден!"));
     }
 
     private Item getItemOrThrow(Long itemId) {

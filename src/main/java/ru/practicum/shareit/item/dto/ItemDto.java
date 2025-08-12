@@ -7,7 +7,8 @@ import ru.practicum.shareit.user.model.User;
 
 @Data
 public class ItemDto {
-    long id;
+
+    Long id;
     @NotBlank
     String name;
     @NotBlank
