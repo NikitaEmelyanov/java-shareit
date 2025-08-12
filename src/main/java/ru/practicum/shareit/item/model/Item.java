@@ -5,7 +5,7 @@ import ru.practicum.shareit.user.model.User;
 
 @Data
 public class Item {
-    long id;
+    Long id;
     String name;
     String description;
     boolean available;

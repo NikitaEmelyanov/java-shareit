@@ -3,10 +3,10 @@ package ru.practicum.shareit.user.dao;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
 
-@Component
+@Repository
 public class UserMemoryRepository implements UserRepository {
 
     private final Map<Long, User> users = new HashMap<>();
