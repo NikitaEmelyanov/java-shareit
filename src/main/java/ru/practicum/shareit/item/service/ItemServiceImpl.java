@@ -25,9 +25,7 @@ import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -96,11 +94,53 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> getAllUserItems(Long userId) {
-        log.debug("Метод сервиса. Получение всех вещей пользователя с id {}", userId);
-        getUserOrThrow(userId);
-        return itemRepository.findByOwnerId(userId).stream()
-                .map(ItemMapper::toItemDto)
+    public List<ItemDto> getAllUserItems(Long userId) {
+        log.info("Получение всех вещей для пользователя с id={}", userId);
+
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("Пользователь не найден.");
+        }
+
+        Collection<Item> userItems = itemRepository.findByOwnerId(userId);
+
+        if (userItems.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Collection<Booking> approvedBookings = bookingRepository.findAllByItemInAndStatus(userItems, STATUS.APPROVED);
+
+        Collection<Comment> itemComments = commentRepository.findAllByItemIn(userItems);
+
+        Map<Long, List<Booking>> bookingsByItemId = approvedBookings.stream()
+                .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
+
+        Map<Long, List<Comment>> commentsByItemId = itemComments.stream()
+                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+
+        LocalDateTime now = LocalDateTime.now();
+        return userItems.stream()
+                .map(item -> {
+                    ItemDto itemDto = ItemMapper.toItemDto(item);
+
+                    List<CommentDto> comments = commentsByItemId.getOrDefault(item.getId(), Collections.emptyList()).stream()
+                            .map(CommentMapper::mapToDto)
+                            .collect(Collectors.toList());
+                    itemDto.setComments(comments);
+
+                    List<Booking> itemBookings = bookingsByItemId.getOrDefault(item.getId(), Collections.emptyList());
+
+                    itemBookings.stream()
+                            .filter(b -> b.getEnd().isBefore(now))
+                            .max(Comparator.comparing(Booking::getEnd))
+                            .ifPresent(b -> itemDto.setLastBooking(BookingMapper.toBookingDto(b)));
+
+                    itemBookings.stream()
+                            .filter(b -> b.getStart().isAfter(now))
+                            .min(Comparator.comparing(Booking::getStart))
+                            .ifPresent(b -> itemDto.setNextBooking(BookingMapper.toBookingDto(b)));
+
+                    return itemDto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -121,10 +161,6 @@ public class ItemServiceImpl implements ItemService {
         User user = getUserOrThrow(userId);
         Item item = getItemOrThrow(itemId);
 
-        if (commentCreateDto.getText() == null || commentCreateDto.getText().isBlank()) {
-            throw new BadRequestException("Текст комментария не может быть пустым.");
-        }
-
         List<Booking> bookings = bookingRepository.findByBookerIdAndItemIdAndEndBeforeAndStatus(
                 userId, itemId, LocalDateTime.now(), STATUS.APPROVED);
 
@@ -133,12 +169,7 @@ public class ItemServiceImpl implements ItemService {
                     "Вы не можете комментировать эту вещь, так как у вас нет завершенных бронирований.");
         }
 
-        Comment comment = new Comment();
-        comment.setCreated(LocalDateTime.now());
-        comment.setAuthor(user);
-        comment.setItem(item);
-        comment.setText(commentCreateDto.getText());
-        return CommentMapper.mapToDto(commentRepository.save(comment));
+        return CommentMapper.mapToDto(commentRepository.save(CommentMapper.buildComment(user, item, commentCreateDto)));
     }
 
     private User getUserOrThrow(Long userId) {
