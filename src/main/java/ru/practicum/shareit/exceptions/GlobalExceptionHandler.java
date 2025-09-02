@@ -17,14 +17,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(NotFoundException e) {
-        return Map.of("Not Found", e.getMessage());
+    public ErrorResponseDto handleNotFoundException(NotFoundException e) {
+        return new ErrorResponseDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleDuplicateEmailException(DuplicateEmailException e) {
-        return Map.of("Duplicate email", e.getMessage());
+    public ErrorResponseDto handleDuplicateEmailException(DuplicateEmailException e) {
+        return new ErrorResponseDto(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -43,25 +43,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationExceptions(ValidationException e) {
-        return Map.of("Validation error", e.getMessage());
+    public ErrorResponseDto handleValidationExceptions(ValidationException e) {
+        return new ErrorResponseDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Map<String, String> handleUnacceptableUserException(UnacceptableValueException e) {
-        return Map.of("Unacceptable value", e.getMessage());
+    public ErrorResponseDto handleUnacceptableUserException(UnacceptableValueException e) {
+        return new ErrorResponseDto(e.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleConstraintViolationException(ConstraintViolationException e) {
-        return Map.of("Validation errors", e.getMessage());
+    public ErrorResponseDto handleConstraintViolationException(ConstraintViolationException e) {
+        return new ErrorResponseDto(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleInternalServerError(Exception e) {
-        return Map.of("Internal server error", e.getMessage());
+    public ErrorResponseDto handleInternalServerError(Exception e) {
+        return new ErrorResponseDto(e.getMessage());
     }
 }
