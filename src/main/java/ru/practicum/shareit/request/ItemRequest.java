@@ -1,9 +1,9 @@
 package ru.practicum.shareit.request;
 
 import lombok.Data;
-import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import ru.practicum.shareit.user.model.User;
 
 @Data
 public class ItemRequest {

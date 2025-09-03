@@ -1,20 +1,19 @@
 package ru.practicum.shareit.item.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.booking.dto.LastBookingDto;
+
+import java.util.Set;
 
 @Data
 public class ItemDto {
-
-    Long id;
-    @NotBlank
-    String name;
-    @NotBlank
-    String description;
-    @NotNull
-    Boolean available;
-    User owner;
-    String request;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private long id;
+    private String name;
+    private String description;
+    private boolean available;
+    private LastBookingDto lastBooking;
+    private LastBookingDto nextBooking;
+    private Set<CommentDto> comments;
 }
