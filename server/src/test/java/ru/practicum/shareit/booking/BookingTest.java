@@ -1,12 +1,13 @@
 package ru.practicum.shareit.booking;
 
-import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.booking.model.Booking;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.booking.model.Booking;
+
 public class BookingTest {
+
     @Test
     void testBookingModelConstructorAndGetters() {
         Booking booking = new Booking();

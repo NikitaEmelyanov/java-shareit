@@ -1,9 +1,8 @@
 package ru.practicum.shareit.request;
 
+import java.util.List;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.NewItemRequest;
-
-import java.util.List;
 
 public interface ItemRequestService {
 

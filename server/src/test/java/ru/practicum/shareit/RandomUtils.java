@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class RandomUtils {
 
-    private static final String[] DOMAINS = { "gmail.com", "yahoo.com", "outlook.com", "test.com" };
+    private static final String[] DOMAINS = {"gmail.com", "yahoo.com", "outlook.com", "test.com"};
     private static final Random random = new Random();
 
     public static String getRandomEmail() {

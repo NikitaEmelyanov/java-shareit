@@ -1,12 +1,13 @@
 package ru.practicum.shareit.item;
 
-import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.item.model.Item;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.item.model.Item;
+
 public class ItemTest {
+
     @Test
     void testItemModelConstructorAndGetters() {
         Item item = new Item();

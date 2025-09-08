@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateUserRequestDto {
+
     @NotBlank(message = "Name should not be empty")
     private String name;
 

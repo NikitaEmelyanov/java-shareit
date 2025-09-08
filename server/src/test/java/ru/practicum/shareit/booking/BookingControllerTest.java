@@ -1,7 +1,25 @@
 package ru.practicum.shareit.booking;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,28 +34,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import ru.practicum.shareit.booking.dto.BookerDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingRequest;
-import ru.practicum.shareit.item.dto.*;
-
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import ru.practicum.shareit.item.dto.ItemDtoAnswer;
 
 @Slf4j
 @WebMvcTest(BookingController.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingControllerTest {
+
     private static final DateTimeFormatter dateTimeFormatter =
         DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneOffset.UTC);
 
@@ -60,7 +63,6 @@ public class BookingControllerTest {
         ItemDtoAnswer item = new ItemDtoAnswer(1L, "some name", userId);
         String start = dateTimeFormatter.format(LocalDateTime.now().plusSeconds(1));
         String end = dateTimeFormatter.format(LocalDateTime.now().plusSeconds(5));
-
 
         NewBookingRequest newBookingRequest = new NewBookingRequest(1L, start, end);
         BookingDto bookingDto = new BookingDto(id, item, booker, BookingState.APPROVED, start, end);
@@ -95,8 +97,10 @@ public class BookingControllerTest {
     @Test
     @SneakyThrows
     void approveBooking() {
-        String start = dateTimeFormatter.format(LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.MICROS));
-        String end = dateTimeFormatter.format(LocalDateTime.now().plusDays(5).truncatedTo(ChronoUnit.MICROS));
+        String start = dateTimeFormatter.format(
+            LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.MICROS));
+        String end = dateTimeFormatter.format(
+            LocalDateTime.now().plusDays(5).truncatedTo(ChronoUnit.MICROS));
         long itemId = 15L;
         long bookingId = 12L;
         long userId = 10L;
@@ -191,7 +195,9 @@ public class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String responseBody = mvcResult.getResponse().getContentAsString();
-        Collection<BookingDto> actualIBookingDtos = mapper.readValue(responseBody, new TypeReference<List<BookingDto>>() {});
+        Collection<BookingDto> actualIBookingDtos = mapper.readValue(responseBody,
+            new TypeReference<List<BookingDto>>() {
+            });
 
         assertNotNull(actualIBookingDtos);
         assertEquals(1, actualIBookingDtos.size());
@@ -230,7 +236,9 @@ public class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String responseBody = mvcResult.getResponse().getContentAsString();
-        Collection<BookingDto> actualIBookingDtos = mapper.readValue(responseBody, new TypeReference<List<BookingDto>>() {});
+        Collection<BookingDto> actualIBookingDtos = mapper.readValue(responseBody,
+            new TypeReference<List<BookingDto>>() {
+            });
 
         assertNotNull(actualIBookingDtos);
         assertEquals(1, actualIBookingDtos.size());

@@ -1,7 +1,23 @@
 package ru.practicum.shareit.item;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -14,25 +30,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.practicum.shareit.booking.dto.LastBookingDto;
-import ru.practicum.shareit.item.dto.*;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.NewCommentRequest;
+import ru.practicum.shareit.item.dto.NewItemRequest;
+import ru.practicum.shareit.item.dto.UpdateItemRequest;
 
 @Slf4j
 @WebMvcTest(ItemController.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemControllerTest {
+
     @MockBean
     ItemService itemService;
 
@@ -56,8 +64,10 @@ public class ItemControllerTest {
         long id = 12L;
         long userId = 10L;
 
-        NewItemRequest newItemRequest = NewItemRequest.builder().name(name).description(description).requestId(requestId).available(available).build();
-        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto, nextBookingDto, requestId, comments);
+        NewItemRequest newItemRequest = NewItemRequest.builder().name(name).description(description)
+            .requestId(requestId).available(available).build();
+        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto,
+            nextBookingDto, requestId, comments);
         when(itemService.addItem(userId, newItemRequest))
             .thenReturn(itemDto);
 
@@ -93,7 +103,8 @@ public class ItemControllerTest {
         long id = 12L;
         long userId = 10L;
 
-        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto, nextBookingDto, requestId, comments);
+        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto,
+            nextBookingDto, requestId, comments);
 
         when(itemService.getItemById(anyLong()))
             .thenReturn(itemDto);
@@ -133,8 +144,10 @@ public class ItemControllerTest {
         String newDescription = description + "upd";
         Boolean newAvailable = !available;
 
-        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto, nextBookingDto, requestId, comments);
-        UpdateItemRequest updateItemRequest = new UpdateItemRequest(newName, newDescription, newAvailable);
+        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto,
+            nextBookingDto, requestId, comments);
+        UpdateItemRequest updateItemRequest = new UpdateItemRequest(newName, newDescription,
+            newAvailable);
 
         when(itemService.updateItem(userId, id, updateItemRequest))
             .thenReturn(itemDto);
@@ -170,7 +183,8 @@ public class ItemControllerTest {
         long id = 12L;
         long userId = 10L;
 
-        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto, nextBookingDto, requestId, comments);
+        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto,
+            nextBookingDto, requestId, comments);
 
         when(itemService.getItemsByOwnerId(anyLong()))
             .thenReturn(List.of(itemDto));
@@ -184,7 +198,9 @@ public class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String responseBody = mvcResult.getResponse().getContentAsString();
-        Collection<ItemDto> actualItemDtos = mapper.readValue(responseBody, new TypeReference<List<ItemDto>>() {});
+        Collection<ItemDto> actualItemDtos = mapper.readValue(responseBody,
+            new TypeReference<List<ItemDto>>() {
+            });
 
         assertNotNull(actualItemDtos);
         assertEquals(1, actualItemDtos.size());
@@ -208,7 +224,8 @@ public class ItemControllerTest {
         long id = 12L;
         long userId = 10L;
 
-        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto, nextBookingDto, requestId, comments);
+        ItemDto itemDto = new ItemDto(id, name, description, available, lastBookingDto,
+            nextBookingDto, requestId, comments);
 
         when(itemService.getItemsByPattern(anyString()))
             .thenReturn(List.of(itemDto));
@@ -223,7 +240,9 @@ public class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String responseBody = mvcResult.getResponse().getContentAsString();
-        Collection<ItemDto> actualItemDtos = mapper.readValue(responseBody, new TypeReference<List<ItemDto>>() {});
+        Collection<ItemDto> actualItemDtos = mapper.readValue(responseBody,
+            new TypeReference<List<ItemDto>>() {
+            });
 
         assertNotNull(actualItemDtos);
         assertEquals(1, actualItemDtos.size());

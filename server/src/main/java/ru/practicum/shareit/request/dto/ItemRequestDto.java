@@ -1,10 +1,14 @@
 package ru.practicum.shareit.request.dto;
 
-import lombok.*;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import ru.practicum.shareit.item.dto.ItemDtoAnswer;
 import ru.practicum.shareit.user.dto.UserDto;
-
-import java.util.Set;
 
 @Getter
 @Setter
@@ -13,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 public class ItemRequestDto {
+
     private Long id;
     private UserDto requestor;
     private String description;

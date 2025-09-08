@@ -1,5 +1,15 @@
 package ru.practicum.shareit.item;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,7 +22,11 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.UnacceptableValueException;
 import ru.practicum.shareit.exceptions.ValidationException;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.NewCommentRequest;
+import ru.practicum.shareit.item.dto.NewItemRequest;
+import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestRepository;
@@ -20,15 +34,12 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
+
     private final ItemRepository itemStorage;
     private final UserRepository userStorage;
     private final BookingRepository bookingRepository;
@@ -38,7 +49,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto getItemById(long itemId) {
         Item item = validateItemNotFound(itemId);
-        Set<CommentDto> comments = commentRepository.findAllByItemIdOrderByCreatedDesc(itemId).stream()
+        Set<CommentDto> comments = commentRepository.findAllByItemIdOrderByCreatedDesc(itemId)
+            .stream()
             .map(CommentMapper::mapToCommentDto)
             .collect(Collectors.toSet());
         return ItemMapper.mapToItemDto(item, null, null, comments);
@@ -85,9 +97,11 @@ public class ItemServiceImpl implements ItemService {
         item.setOwner(user);
         if (newItemRequest.getRequestId() != null) {
             ItemRequest itemRequest = itemRequestRepository.findById(newItemRequest.getRequestId())
-                .orElseThrow(() -> new NotFoundException(String.format("Request not found, requestId %s",
-                    newItemRequest.getRequestId())));
-            log.debug("Check request, requestId={}, finded request {}", newItemRequest.getRequestId(), itemRequest);
+                .orElseThrow(
+                    () -> new NotFoundException(String.format("Request not found, requestId %s",
+                        newItemRequest.getRequestId())));
+            log.debug("Check request, requestId={}, finded request {}",
+                newItemRequest.getRequestId(), itemRequest);
             item.setItemRequest(itemRequest);
         }
         Item newItem = itemStorage.save(item);
@@ -117,11 +131,13 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId() == userId) {
             throw new UnacceptableValueException("The owner should not add comment to item");
         }
-        bookingRepository.findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(author.getId(), item.getId(), LocalDateTime.now())
+        bookingRepository.findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(
+                author.getId(), item.getId(), LocalDateTime.now())
             .stream()
             .filter(booking -> booking.getState() == BookingState.APPROVED)
             .findFirst()
-            .orElseThrow(() -> new ValidationException("The user has no completed bookings and can't add a comment"));
+            .orElseThrow(() -> new ValidationException(
+                "The user has no completed bookings and can't add a comment"));
         Comment comment = CommentMapper.mapToComment(newCommentRequest, author, item);
 
         return CommentMapper.mapToCommentDto(commentRepository.save(comment));
@@ -155,9 +171,10 @@ public class ItemServiceImpl implements ItemService {
         if (bookings == null) {
             return null;
         }
-        Optional<Booking> bookingOpt =  bookings.stream()
+        Optional<Booking> bookingOpt = bookings.stream()
             .filter(b -> (b.getEndTime().isBefore(LocalDateTime.now()) ||
-                          b.getStartTime().isBefore(LocalDateTime.now()) && b.getEndTime().isAfter(LocalDateTime.now())))
+                          b.getStartTime().isBefore(LocalDateTime.now()) && b.getEndTime()
+                              .isAfter(LocalDateTime.now())))
             .max(Comparator.comparing(Booking::getEndTime));
         if (bookingOpt.isEmpty()) {
             return null;
@@ -169,7 +186,7 @@ public class ItemServiceImpl implements ItemService {
         if (bookings == null) {
             return null;
         }
-        Optional<Booking> bookingOpt =  bookings.stream()
+        Optional<Booking> bookingOpt = bookings.stream()
             .filter(b -> b.getStartTime().isAfter(LocalDateTime.now()))
             .min(Comparator.comparing(Booking::getStartTime));
         if (bookingOpt.isEmpty()) {

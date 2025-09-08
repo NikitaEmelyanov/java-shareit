@@ -1,6 +1,8 @@
 package ru.practicum.shareit.exceptions;
 
 import jakarta.validation.ConstraintViolationException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -10,9 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -26,7 +25,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+        MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getAllErrors().forEach(error -> {
@@ -57,8 +57,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, String>> handleEmailConflict(DataIntegrityViolationException ex) {
-        String rawMessage = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+    public ResponseEntity<Map<String, String>> handleEmailConflict(
+        DataIntegrityViolationException ex) {
+        String rawMessage =
+            ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
 
         String userMessage = rawMessage.contains("users_email_key")
             ? "This email address is already registered."

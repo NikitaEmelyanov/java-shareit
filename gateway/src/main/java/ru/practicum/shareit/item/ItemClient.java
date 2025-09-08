@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -12,14 +13,14 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.NewItemRequest;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
 
-import java.util.Map;
-
 @Component
 public class ItemClient extends BaseClient {
+
     private static final String API_PREFIX = "/items";
 
     @Autowired
-    public ItemClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public ItemClient(@Value("${shareit-server.url}") String serverUrl,
+        RestTemplateBuilder builder) {
         super(
             builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
@@ -47,7 +48,8 @@ public class ItemClient extends BaseClient {
         return get("?text={pattern}", userId, parameters);
     }
 
-    public ResponseEntity<Object> updateItem(long userId, long itemId, UpdateItemRequest requestDto) {
+    public ResponseEntity<Object> updateItem(long userId, long itemId,
+        UpdateItemRequest requestDto) {
         return patch("/" + itemId, userId, requestDto);
     }
 

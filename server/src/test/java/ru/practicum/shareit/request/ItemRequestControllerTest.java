@@ -1,7 +1,24 @@
 package ru.practicum.shareit.request;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -19,28 +36,11 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.NewItemRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @Slf4j
 @WebMvcTest(ItemRequestController.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemRequestControllerTest {
+
     private static final DateTimeFormatter dateTimeFormatter =
         DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneOffset.UTC);
 
@@ -66,7 +66,8 @@ public class ItemRequestControllerTest {
         long userId = 10L;
         UserDto userDto = UserDto.builder().id(userId).name(name).email(email).build();
         NewItemRequest newItemRequest = new NewItemRequest(description);
-        ItemRequestDto itemRequestDto = new ItemRequestDto(id, userDto, description, created, answers);
+        ItemRequestDto itemRequestDto = new ItemRequestDto(id, userDto, description, created,
+            answers);
         when(itemRequestService.addRequest(userId, newItemRequest))
             .thenReturn(itemRequestDto);
 
@@ -101,8 +102,8 @@ public class ItemRequestControllerTest {
         long userId = 10L;
 
         UserDto userDto = UserDto.builder().id(userId).name(name).email(email).build();
-        ItemRequestDto itemRequestDto = new ItemRequestDto(id, userDto, description, created, answers);
-
+        ItemRequestDto itemRequestDto = new ItemRequestDto(id, userDto, description, created,
+            answers);
 
         when(itemRequestService.getRequest(userId, id))
             .thenReturn(itemRequestDto);
@@ -137,7 +138,8 @@ public class ItemRequestControllerTest {
         long userId = 10L;
 
         UserDto userDto = UserDto.builder().id(userId).name(name).email(email).build();
-        ItemRequestDto itemRequestDto = new ItemRequestDto(id, userDto, description, created, answers);
+        ItemRequestDto itemRequestDto = new ItemRequestDto(id, userDto, description, created,
+            answers);
 
         when(itemRequestService.getRequestsByRequestor(anyLong()))
             .thenReturn(List.of(itemRequestDto));
@@ -151,7 +153,9 @@ public class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String responseBody = mvcResult.getResponse().getContentAsString();
-        Collection<ItemRequestDto> actualItemRequestDtos = mapper.readValue(responseBody, new TypeReference<List<ItemRequestDto>>() {});
+        Collection<ItemRequestDto> actualItemRequestDtos = mapper.readValue(responseBody,
+            new TypeReference<List<ItemRequestDto>>() {
+            });
 
         assertNotNull(actualItemRequestDtos);
         assertEquals(1, actualItemRequestDtos.size());
@@ -174,7 +178,8 @@ public class ItemRequestControllerTest {
         long userId = 10L;
 
         UserDto userDto = UserDto.builder().id(userId).name(name).email(email).build();
-        ItemRequestDto itemRequestDto = new ItemRequestDto(id, userDto, description, created, answers);
+        ItemRequestDto itemRequestDto = new ItemRequestDto(id, userDto, description, created,
+            answers);
 
         when(itemRequestService.getAll(userId))
             .thenReturn(List.of(itemRequestDto));
@@ -188,7 +193,9 @@ public class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String responseBody = mvcResult.getResponse().getContentAsString();
-        Collection<ItemRequestDto> actualItemRequestsDtos = mapper.readValue(responseBody, new TypeReference<List<ItemRequestDto>>() {});
+        Collection<ItemRequestDto> actualItemRequestsDtos = mapper.readValue(responseBody,
+            new TypeReference<List<ItemRequestDto>>() {
+            });
 
         assertNotNull(actualItemRequestsDtos);
         assertEquals(1, actualItemRequestsDtos.size());

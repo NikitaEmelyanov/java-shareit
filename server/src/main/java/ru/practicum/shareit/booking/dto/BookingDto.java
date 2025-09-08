@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.dto.ItemDtoAnswer;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookingDto {
+
     private Long id;
     private ItemDtoAnswer item;
     private BookerDto booker;

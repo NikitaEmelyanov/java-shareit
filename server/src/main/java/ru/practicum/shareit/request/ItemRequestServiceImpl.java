@@ -1,5 +1,11 @@
 package ru.practicum.shareit.request;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,13 +21,12 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ItemRequestServiceImpl implements ItemRequestService {
+
     private final ItemRequestRepository itemRequestRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
@@ -38,7 +43,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getRequestsByRequestor(long userId) {
         validateUserNotFound(userId);
-        List<ItemRequest> requests = itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(userId);
+        List<ItemRequest> requests = itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(
+            userId);
         Map<Long, Set<ItemDtoAnswer>> answersByRequests = getAnswersByRequests(requests);
 
         return requests.stream().map(request -> {
@@ -94,7 +100,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private ItemRequest validateItemRequestNotFound(long itemRequest) {
         Optional<ItemRequest> itemRequestOpt = itemRequestRepository.findById(itemRequest);
         if (itemRequestOpt.isEmpty()) {
-            String message = String.format("The service did not find request by id %s", itemRequest);
+            String message = String.format("The service did not find request by id %s",
+                itemRequest);
             log.warn("The process validation request id ended with an error. {}", message);
             throw new NotFoundException(message);
         } else {

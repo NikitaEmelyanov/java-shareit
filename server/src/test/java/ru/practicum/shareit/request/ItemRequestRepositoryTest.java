@@ -1,5 +1,13 @@
 package ru.practicum.shareit.request;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,18 +18,11 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-
 @DataJpaTest
 @ActiveProfiles("test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemRequestRepositoryTest {
+
     private static final DateTimeFormatter dateTimeFormatter =
         DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneOffset.UTC);
 
@@ -80,16 +81,18 @@ public class ItemRequestRepositoryTest {
         assertNotNull(savedRequest2);
         assertTrue(savedRequest2.getId() > 0);
 
-        List<ItemRequest> findedRequests = itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(requestor.getId());
+        List<ItemRequest> findedRequests = itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(
+            requestor.getId());
         assertNotNull(findedRequests);
         assertThat(findedRequests.size() == 2);
         ItemRequest findedRequest1 = findedRequests.get(0);
         ItemRequest findedRequest2 = findedRequests.get(1);
 
-
         //expected order request2, request1
-        assertThat(request1).usingRecursiveComparison().ignoringFields("id").isEqualTo(findedRequest2);
-        assertThat(request2).usingRecursiveComparison().ignoringFields("id").isEqualTo(findedRequest1);
+        assertThat(request1).usingRecursiveComparison().ignoringFields("id")
+            .isEqualTo(findedRequest2);
+        assertThat(request2).usingRecursiveComparison().ignoringFields("id")
+            .isEqualTo(findedRequest1);
     }
 
     @Test
@@ -125,16 +128,19 @@ public class ItemRequestRepositoryTest {
         assertTrue(savedRequest2.getId() > 0);
 
         //expected order request2, request1
-        assertThat(request1).usingRecursiveComparison().ignoringFields("id").isEqualTo(savedRequest1);
-        assertThat(request2).usingRecursiveComparison().ignoringFields("id").isEqualTo(savedRequest2);
+        assertThat(request1).usingRecursiveComparison().ignoringFields("id")
+            .isEqualTo(savedRequest1);
+        assertThat(request2).usingRecursiveComparison().ignoringFields("id")
+            .isEqualTo(savedRequest2);
 
-        List<ItemRequest> findedRequests = itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(requestor.getId());
+        List<ItemRequest> findedRequests = itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(
+            requestor.getId());
         assertNotNull(findedRequests);
         assertThat(findedRequests.size() == 1);
         ItemRequest findedRequest = findedRequests.get(0);
 
-
         //expected only request2
-        assertThat(request2).usingRecursiveComparison().ignoringFields("id").isEqualTo(findedRequest);
+        assertThat(request2).usingRecursiveComparison().ignoringFields("id")
+            .isEqualTo(findedRequest);
     }
 }

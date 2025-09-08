@@ -1,5 +1,24 @@
 package ru.practicum.shareit.item;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +31,11 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.UnacceptableValueException;
 import ru.practicum.shareit.exceptions.ValidationException;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.NewCommentRequest;
+import ru.practicum.shareit.item.dto.NewItemRequest;
+import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestRepository;
@@ -20,28 +43,22 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceTest {
+
     private static final DateTimeFormatter dateTimeFormatter =
         DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneOffset.UTC);
 
-    @Mock private ItemRepository itemRepositoryMock;
-    @Mock private UserRepository userRepositoryMock;
-    @Mock private BookingRepository bookingRepositoryMock;
-    @Mock private CommentRepository commentRepositoryMock;
-    @Mock private ItemRequestRepository itemRequestRepositoryMock;
+    @Mock
+    private ItemRepository itemRepositoryMock;
+    @Mock
+    private UserRepository userRepositoryMock;
+    @Mock
+    private BookingRepository bookingRepositoryMock;
+    @Mock
+    private CommentRepository commentRepositoryMock;
+    @Mock
+    private ItemRequestRepository itemRequestRepositoryMock;
 
     @Mock
     private ItemMapper itemMapper;
@@ -124,8 +141,10 @@ public class ItemServiceTest {
 
         Item item = new Item(itemId, owner, name, description, available, null, null, request);
 
-        Booking lastBooking = new Booking(1L, item, user, BookingState.APPROVED, LocalDateTime.MIN, LocalDateTime.MIN.plusDays(1));
-        Booking nextBooking = new Booking(2L, item, user, BookingState.APPROVED, LocalDateTime.MAX.minusDays(1), LocalDateTime.MAX);
+        Booking lastBooking = new Booking(1L, item, user, BookingState.APPROVED, LocalDateTime.MIN,
+            LocalDateTime.MIN.plusDays(1));
+        Booking nextBooking = new Booking(2L, item, user, BookingState.APPROVED,
+            LocalDateTime.MAX.minusDays(1), LocalDateTime.MAX);
 
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(owner));
@@ -148,9 +167,11 @@ public class ItemServiceTest {
         assertEquals(description, findedItem.getDescription());
         assertEquals(available, findedItem.isAvailable());
         assertEquals(lastBooking.getId(), findedItem.getLastBooking().getId());
-        assertEquals(dateTimeFormatter.format(lastBooking.getStartTime()), findedItem.getLastBooking().getStart());
+        assertEquals(dateTimeFormatter.format(lastBooking.getStartTime()),
+            findedItem.getLastBooking().getStart());
         assertEquals(nextBooking.getId(), findedItem.getNextBooking().getId());
-        assertEquals(dateTimeFormatter.format(nextBooking.getEndTime()), findedItem.getNextBooking().getEnd());
+        assertEquals(dateTimeFormatter.format(nextBooking.getEndTime()),
+            findedItem.getNextBooking().getEnd());
 
         assertEquals(requestId, findedItem.getItemRequest());
         assertThat(findedItem.getComments().isEmpty());
@@ -174,7 +195,6 @@ public class ItemServiceTest {
         ItemRequest request = new ItemRequest(requestId, null, null, null);
 
         Item item = new Item(itemId, owner, name, description, available, null, null, request);
-
 
         Booking lastBooking = new Booking(1L, item, user, BookingState.APPROVED,
             LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1));
@@ -203,9 +223,11 @@ public class ItemServiceTest {
         assertEquals(available, findedItem.isAvailable());
         assertNotNull(findedItem.getLastBooking());
         assertEquals(lastBooking.getId(), findedItem.getLastBooking().getId());
-        assertEquals(dateTimeFormatter.format(lastBooking.getStartTime()), findedItem.getLastBooking().getStart());
+        assertEquals(dateTimeFormatter.format(lastBooking.getStartTime()),
+            findedItem.getLastBooking().getStart());
         assertEquals(nextBooking.getId(), findedItem.getNextBooking().getId());
-        assertEquals(dateTimeFormatter.format(nextBooking.getEndTime()), findedItem.getNextBooking().getEnd());
+        assertEquals(dateTimeFormatter.format(nextBooking.getEndTime()),
+            findedItem.getNextBooking().getEnd());
 
         assertEquals(requestId, findedItem.getItemRequest());
         assertThat(findedItem.getComments().isEmpty());
@@ -287,7 +309,6 @@ public class ItemServiceTest {
         assertEquals(available, savedItemDto.isAvailable());
         assertEquals(requestId, savedItemDto.getItemRequest());
 
-
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRequestRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).save(any(Item.class));
@@ -298,7 +319,8 @@ public class ItemServiceTest {
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> itemService.addItem(1L, any(NewItemRequest.class)));
+        assertThrows(NotFoundException.class,
+            () -> itemService.addItem(1L, any(NewItemRequest.class)));
 
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRequestRepositoryMock, never()).findById(anyLong());
@@ -343,7 +365,8 @@ public class ItemServiceTest {
 
         NewCommentRequest newCommentReq = new NewCommentRequest(text);
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking lastBooking = new Booking(1L, item, author, BookingState.APPROVED, LocalDateTime.MIN, LocalDateTime.MIN.plusDays(1));
+        Booking lastBooking = new Booking(1L, item, author, BookingState.APPROVED,
+            LocalDateTime.MIN, LocalDateTime.MIN.plusDays(1));
         Comment comment = new Comment(commentId, item, author, text, LocalDateTime.now());
 
         when(userRepositoryMock.findById(anyLong()))
@@ -352,7 +375,8 @@ public class ItemServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        when(bookingRepositoryMock.findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(), anyLong(),
+        when(bookingRepositoryMock.findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(
+            anyLong(), anyLong(),
             any(LocalDateTime.class))).thenReturn(List.of(lastBooking));
 
         when(commentRepositoryMock.save(any(Comment.class)))
@@ -365,10 +389,10 @@ public class ItemServiceTest {
         assertEquals(text, commentDto.getText());
         assertEquals(comment.getAuthor().getName(), commentDto.getAuthorName());
 
-
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(), anyLong(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(
+            anyLong(), anyLong(), any(LocalDateTime.class));
         verify(commentRepositoryMock).save(any(Comment.class));
     }
 
@@ -392,11 +416,14 @@ public class ItemServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        assertThrows(UnacceptableValueException.class, () -> itemService.addComment(newCommentReq, owner.getId(), item.getId()));
+        assertThrows(UnacceptableValueException.class,
+            () -> itemService.addComment(newCommentReq, owner.getId(), item.getId()));
 
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock, never()).findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(), anyLong(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock,
+            never()).findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(),
+            anyLong(), any(LocalDateTime.class));
         verify(commentRepositoryMock, never()).save(any(Comment.class));
     }
 
@@ -413,7 +440,8 @@ public class ItemServiceTest {
 
         NewCommentRequest newCommentReq = new NewCommentRequest(text);
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking lastBooking = new Booking(1L, item, author, BookingState.APPROVED, LocalDateTime.MIN, LocalDateTime.MIN.plusDays(1));
+        Booking lastBooking = new Booking(1L, item, author, BookingState.APPROVED,
+            LocalDateTime.MIN, LocalDateTime.MIN.plusDays(1));
         Comment comment = new Comment(commentId, item, author, text, LocalDateTime.now());
 
         when(userRepositoryMock.findById(anyLong()))
@@ -422,13 +450,16 @@ public class ItemServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        when(bookingRepositoryMock.findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(), anyLong(),
+        when(bookingRepositoryMock.findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(
+            anyLong(), anyLong(),
             any(LocalDateTime.class))).thenReturn(List.of());
 
-        assertThrows(ValidationException.class, () -> itemService.addComment(newCommentReq, author.getId(), item.getId()));
+        assertThrows(ValidationException.class,
+            () -> itemService.addComment(newCommentReq, author.getId(), item.getId()));
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(), anyLong(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(
+            anyLong(), anyLong(), any(LocalDateTime.class));
         verify(commentRepositoryMock, never()).save(any(Comment.class));
     }
 
@@ -442,10 +473,12 @@ public class ItemServiceTest {
         long itemId = 12L;
         User owner = new User(1L, name, RandomUtils.getRandomEmail());
 
-        UpdateItemRequest updateItemRequest = new UpdateItemRequest(newName, newDescription, !available);
+        UpdateItemRequest updateItemRequest = new UpdateItemRequest(newName, newDescription,
+            !available);
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Item updatedItem = new Item(itemId, owner, newName, newDescription, !available, null, null, null);
+        Item updatedItem = new Item(itemId, owner, newName, newDescription, !available, null, null,
+            null);
 
         when(itemRepositoryMock.findById(anyLong())).thenReturn(Optional.of(item));
 

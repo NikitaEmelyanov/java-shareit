@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateItemRequest {
+
     @Size(max = 50, message = "Name should be no longer than 250 characters")
     private String name;
 

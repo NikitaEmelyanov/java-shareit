@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class LastBookingDto {
+
     private Long id;
     private BookerDto booker;
     private String start;

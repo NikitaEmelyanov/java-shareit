@@ -1,28 +1,32 @@
 package ru.practicum.shareit.booking;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+
     //all bookings
     List<Booking> findAllByUserIdOrderByStartTimeDesc(Long userId);
 
     //past bookings
-    List<Booking> findAllByUserIdAndEndTimeBeforeOrderByStartTimeDesc(Long userId, LocalDateTime timeNow);
+    List<Booking> findAllByUserIdAndEndTimeBeforeOrderByStartTimeDesc(Long userId,
+        LocalDateTime timeNow);
 
-    List<Booking> findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(Long userId, Long itemId, LocalDateTime timeNow);
+    List<Booking> findAllByUserIdAndItemIdAndEndTimeBeforeOrderByStartTimeDesc(Long userId,
+        Long itemId, LocalDateTime timeNow);
 
     //future bookings
-    List<Booking> findAllByUserIdAndStartTimeAfterOrderByStartTimeDesc(Long userId, LocalDateTime timeNow);
+    List<Booking> findAllByUserIdAndStartTimeAfterOrderByStartTimeDesc(Long userId,
+        LocalDateTime timeNow);
 
     //current bookings
-    List<Booking> findAllByUserIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(Long userId, LocalDateTime timeNow, LocalDateTime timeNow2);
+    List<Booking> findAllByUserIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(Long userId,
+        LocalDateTime timeNow, LocalDateTime timeNow2);
 
     //bookings by state
     List<Booking> findAllByUserIdAndStateOrderByStartTimeDesc(Long userId, BookingState state);
@@ -70,10 +74,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllCurrentAndFutureBookingForItems(List<Item> items, LocalDateTime timeNow);
 
     //last booking
-    Optional<Booking> findTop1ByItemIdAndStartTimeBeforeAndStateOrderByStartTimeDesc(Long itemId, LocalDateTime timeNow, BookingState state);
+    Optional<Booking> findTop1ByItemIdAndStartTimeBeforeAndStateOrderByStartTimeDesc(Long itemId,
+        LocalDateTime timeNow, BookingState state);
 
     //next booking
-    Optional<Booking> findTop1ByItemIdAndStartTimeAfterAndStateOrderByStartTimeAsc(Long itemId, LocalDateTime timeNow, BookingState state);
+    Optional<Booking> findTop1ByItemIdAndStartTimeAfterAndStateOrderByStartTimeAsc(Long itemId,
+        LocalDateTime timeNow, BookingState state);
 
     @Query("select booking " +
            "from Booking as booking " +

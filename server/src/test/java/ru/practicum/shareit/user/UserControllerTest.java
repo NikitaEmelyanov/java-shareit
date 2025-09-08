@@ -1,7 +1,25 @@
 package ru.practicum.shareit.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -18,20 +36,6 @@ import ru.practicum.shareit.RandomUtils;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @Slf4j
 @WebMvcTest(UserController.class)
@@ -103,7 +107,8 @@ public class UserControllerTest {
 
         assertNotNull(actualUserDto.getId());
         assertEquals(id, actualUserDto.getId());
-        assertThat(actualUserDto).usingRecursiveComparison().ignoringFields("id").isEqualTo(userDto);
+        assertThat(actualUserDto).usingRecursiveComparison().ignoringFields("id")
+            .isEqualTo(userDto);
 
         verify(userService).findUserById(id);
     }
@@ -173,8 +178,9 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String responseBody = mvcResult.getResponse().getContentAsString();
-        Collection<UserDto> actualUserDtoList = mapper.readValue(responseBody, new TypeReference<List<UserDto>>() {
-        });
+        Collection<UserDto> actualUserDtoList = mapper.readValue(responseBody,
+            new TypeReference<List<UserDto>>() {
+            });
 
         assertNotNull(actualUserDtoList);
         assertEquals(1, actualUserDtoList.size());

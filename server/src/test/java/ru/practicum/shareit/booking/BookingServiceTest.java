@@ -1,5 +1,21 @@
 package ru.practicum.shareit.booking;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,30 +27,23 @@ import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exceptions.UnacceptableValueException;
 import ru.practicum.shareit.exceptions.ValidationException;
-import ru.practicum.shareit.item.*;
+import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class BookingServiceTest {
+
     private static final DateTimeFormatter dateTimeFormatter =
         DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneOffset.UTC);
 
-    @Mock private ItemRepository itemRepositoryMock;
-    @Mock private UserRepository userRepositoryMock;
-    @Mock private BookingRepository bookingRepositoryMock;
+    @Mock
+    private ItemRepository itemRepositoryMock;
+    @Mock
+    private UserRepository userRepositoryMock;
+    @Mock
+    private BookingRepository bookingRepositoryMock;
 
     @Mock
     private BookingMapper itemMapper;
@@ -43,7 +52,8 @@ public class BookingServiceTest {
 
     @BeforeEach
     void setUp() {
-        bookingService = new BookingServiceImpl(userRepositoryMock, itemRepositoryMock, bookingRepositoryMock);
+        bookingService = new BookingServiceImpl(userRepositoryMock, itemRepositoryMock,
+            bookingRepositoryMock);
     }
 
     @Test
@@ -61,7 +71,8 @@ public class BookingServiceTest {
         String end = dateTimeFormatter.format(endDate);
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
 
         when(bookingRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(booking));
@@ -96,12 +107,14 @@ public class BookingServiceTest {
         String end = dateTimeFormatter.format(endDate);
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking booking = new Booking(bookingId, item, booker, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, booker, BookingState.WAITING, startDate,
+            endDate);
 
         when(bookingRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(booking));
 
-        assertThrows(UnacceptableValueException.class, () -> bookingService.getBookingById(user.getId(), bookingId));
+        assertThrows(UnacceptableValueException.class,
+            () -> bookingService.getBookingById(user.getId(), bookingId));
 
         verify(bookingRepositoryMock).findById(anyLong());
     }
@@ -122,16 +135,20 @@ public class BookingServiceTest {
         BookingStateFilter filter = BookingStateFilter.CURRENT;
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
 
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(user));
 
-        when(bookingRepositoryMock.findAllByUserIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(anyLong(),
-            any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(
+            bookingRepositoryMock.findAllByUserIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(
+                anyLong(),
+                any(LocalDateTime.class), any(LocalDateTime.class)))
             .thenReturn(List.of(booking));
 
-        Collection<BookingDto> currentBookings = bookingService.getAllBookingsByUser(user.getId(), filter);
+        Collection<BookingDto> currentBookings = bookingService.getAllBookingsByUser(user.getId(),
+            filter);
 
         assertNotNull(currentBookings);
         assertEquals(1, currentBookings.size());
@@ -146,7 +163,9 @@ public class BookingServiceTest {
         assertEquals(booking.getState(), currentBooking.getStatus());
 
         verify(userRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllByUserIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(anyLong(),
+        verify(
+            bookingRepositoryMock).findAllByUserIdAndStartTimeBeforeAndEndTimeAfterOrderByStartTimeDesc(
+            anyLong(),
             any(LocalDateTime.class), any(LocalDateTime.class));
     }
 
@@ -172,10 +191,12 @@ public class BookingServiceTest {
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(user));
 
-        when(bookingRepositoryMock.findAllByUserIdAndStateOrderByStartTimeDesc(anyLong(), any(BookingState.class)))
+        when(bookingRepositoryMock.findAllByUserIdAndStateOrderByStartTimeDesc(anyLong(),
+            any(BookingState.class)))
             .thenReturn(List.of(booking));
 
-        Collection<BookingDto> currentBookings = bookingService.getAllBookingsByUser(user.getId(), filter);
+        Collection<BookingDto> currentBookings = bookingService.getAllBookingsByUser(user.getId(),
+            filter);
 
         assertNotNull(currentBookings);
         assertEquals(1, currentBookings.size());
@@ -190,7 +211,8 @@ public class BookingServiceTest {
         assertEquals(booking.getState(), currentBooking.getStatus());
 
         verify(userRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllByUserIdAndStateOrderByStartTimeDesc(anyLong(), any(BookingState.class));
+        verify(bookingRepositoryMock).findAllByUserIdAndStateOrderByStartTimeDesc(anyLong(),
+            any(BookingState.class));
     }
 
     @Test
@@ -215,10 +237,12 @@ public class BookingServiceTest {
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(user));
 
-        when(bookingRepositoryMock.findAllByUserIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(), any(LocalDateTime.class)))
+        when(bookingRepositoryMock.findAllByUserIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(),
+            any(LocalDateTime.class)))
             .thenReturn(List.of(booking));
 
-        Collection<BookingDto> currentBookings = bookingService.getAllBookingsByUser(user.getId(), filter);
+        Collection<BookingDto> currentBookings = bookingService.getAllBookingsByUser(user.getId(),
+            filter);
 
         assertNotNull(currentBookings);
         assertEquals(1, currentBookings.size());
@@ -233,7 +257,8 @@ public class BookingServiceTest {
         assertEquals(booking.getState(), currentBooking.getStatus());
 
         verify(userRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllByUserIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findAllByUserIdAndEndTimeBeforeOrderByStartTimeDesc(anyLong(),
+            any(LocalDateTime.class));
     }
 
 
@@ -253,7 +278,8 @@ public class BookingServiceTest {
         BookingStateFilter filter = BookingStateFilter.PAST;
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
 
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(user));
@@ -261,7 +287,8 @@ public class BookingServiceTest {
         when(bookingRepositoryMock.findPastBookingsByOwner(anyLong(), any(LocalDateTime.class)))
             .thenReturn(List.of(booking));
 
-        Collection<BookingDto> currentBookings = bookingService.getAllBookingByOwner(owner.getId(), filter);
+        Collection<BookingDto> currentBookings = bookingService.getAllBookingByOwner(owner.getId(),
+            filter);
 
         assertNotNull(currentBookings);
         assertEquals(1, currentBookings.size());
@@ -295,7 +322,8 @@ public class BookingServiceTest {
         BookingStateFilter filter = BookingStateFilter.FUTURE;
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
 
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(user));
@@ -303,7 +331,8 @@ public class BookingServiceTest {
         when(bookingRepositoryMock.findFutureBookingsByOwner(anyLong(), any(LocalDateTime.class)))
             .thenReturn(List.of(booking));
 
-        Collection<BookingDto> currentBookings = bookingService.getAllBookingByOwner(owner.getId(), filter);
+        Collection<BookingDto> currentBookings = bookingService.getAllBookingByOwner(owner.getId(),
+            filter);
 
         assertNotNull(currentBookings);
         assertEquals(1, currentBookings.size());
@@ -318,7 +347,8 @@ public class BookingServiceTest {
         assertEquals(booking.getState(), currentBooking.getStatus());
 
         verify(userRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findFutureBookingsByOwner(anyLong(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findFutureBookingsByOwner(anyLong(),
+            any(LocalDateTime.class));
     }
 
     @Test
@@ -337,7 +367,8 @@ public class BookingServiceTest {
         BookingStateFilter filter = BookingStateFilter.REJECTED;
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
 
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(user));
@@ -345,7 +376,8 @@ public class BookingServiceTest {
         when(bookingRepositoryMock.findAllByOwnerWithState(anyLong(), any(BookingState.class)))
             .thenReturn(List.of(booking));
 
-        Collection<BookingDto> currentBookings = bookingService.getAllBookingByOwner(owner.getId(), filter);
+        Collection<BookingDto> currentBookings = bookingService.getAllBookingByOwner(owner.getId(),
+            filter);
 
         assertNotNull(currentBookings);
         assertEquals(1, currentBookings.size());
@@ -379,7 +411,8 @@ public class BookingServiceTest {
         BookingStateFilter filter = BookingStateFilter.CURRENT;
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
 
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(user));
@@ -387,7 +420,8 @@ public class BookingServiceTest {
         when(bookingRepositoryMock.findCurrentBookingsByOwner(anyLong(), any(LocalDateTime.class)))
             .thenReturn(List.of(booking));
 
-        Collection<BookingDto> currentBookings = bookingService.getAllBookingByOwner(owner.getId(), filter);
+        Collection<BookingDto> currentBookings = bookingService.getAllBookingByOwner(owner.getId(),
+            filter);
 
         assertNotNull(currentBookings);
         assertEquals(1, currentBookings.size());
@@ -402,7 +436,8 @@ public class BookingServiceTest {
         assertEquals(booking.getState(), currentBooking.getStatus());
 
         verify(userRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findCurrentBookingsByOwner(anyLong(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findCurrentBookingsByOwner(anyLong(),
+            any(LocalDateTime.class));
     }
 
 
@@ -422,8 +457,8 @@ public class BookingServiceTest {
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
         NewBookingRequest newBookingRequest = new NewBookingRequest(itemId, start, end);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
-
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
 
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(owner));
@@ -431,7 +466,8 @@ public class BookingServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class)))
+        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class)))
             .thenReturn(List.of());
 
         when(bookingRepositoryMock.save(any(Booking.class)))
@@ -448,10 +484,10 @@ public class BookingServiceTest {
         assertEquals(end, savedBooking.getEnd());
         assertEquals(booking.getState(), savedBooking.getStatus());
 
-
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class));
         verify(bookingRepositoryMock).save(any(Booking.class));
     }
 
@@ -471,8 +507,8 @@ public class BookingServiceTest {
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
         NewBookingRequest newBookingRequest = new NewBookingRequest(itemId, start, end);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
-
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
 
         when(userRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(owner));
@@ -480,11 +516,13 @@ public class BookingServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        assertThrows(RuntimeException.class, () -> bookingService.addBooking(user.getId(), newBookingRequest));
+        assertThrows(RuntimeException.class,
+            () -> bookingService.addBooking(user.getId(), newBookingRequest));
 
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock, never()).findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock, never()).findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class));
         verify(bookingRepositoryMock, never()).save(any(Booking.class));
     }
 
@@ -506,7 +544,8 @@ public class BookingServiceTest {
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
         NewBookingRequest newBookingRequest = new NewBookingRequest(itemId, start, end);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
         Booking otherBooking = new Booking(otherBookingId, item, otherUser, BookingState.WAITING,
             startDate.minusHours(6), endDate.plusHours(6));
 
@@ -516,14 +555,17 @@ public class BookingServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class)))
+        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class)))
             .thenReturn(List.of(otherBooking));
 
-        assertThrows(UnacceptableValueException.class, () -> bookingService.addBooking(user.getId(), newBookingRequest));
+        assertThrows(UnacceptableValueException.class,
+            () -> bookingService.addBooking(user.getId(), newBookingRequest));
 
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class));
         verify(bookingRepositoryMock, never()).save(any(Booking.class));
     }
 
@@ -545,7 +587,8 @@ public class BookingServiceTest {
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
         NewBookingRequest newBookingRequest = new NewBookingRequest(itemId, start, end);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
         Booking otherBooking = new Booking(otherBookingId, item, otherUser, BookingState.WAITING,
             startDate.plusDays(1), endDate.plusDays(1));
 
@@ -555,14 +598,17 @@ public class BookingServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class)))
+        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class)))
             .thenReturn(List.of(otherBooking));
 
-        assertThrows(UnacceptableValueException.class, () -> bookingService.addBooking(user.getId(), newBookingRequest));
+        assertThrows(UnacceptableValueException.class,
+            () -> bookingService.addBooking(user.getId(), newBookingRequest));
 
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class));
         verify(bookingRepositoryMock, never()).save(any(Booking.class));
     }
 
@@ -584,7 +630,8 @@ public class BookingServiceTest {
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
         NewBookingRequest newBookingRequest = new NewBookingRequest(itemId, start, end);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
         Booking otherBooking = new Booking(otherBookingId, item, otherUser, BookingState.WAITING,
             startDate.minusDays(1), endDate.minusDays(1));
 
@@ -594,14 +641,17 @@ public class BookingServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class)))
+        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class)))
             .thenReturn(List.of(otherBooking));
 
-        assertThrows(UnacceptableValueException.class, () -> bookingService.addBooking(user.getId(), newBookingRequest));
+        assertThrows(UnacceptableValueException.class,
+            () -> bookingService.addBooking(user.getId(), newBookingRequest));
 
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class));
         verify(bookingRepositoryMock, never()).save(any(Booking.class));
     }
 
@@ -626,7 +676,8 @@ public class BookingServiceTest {
 
         Item item = new Item(itemId, owner, name, description, available, null, null, null);
         NewBookingRequest newBookingRequest = new NewBookingRequest(itemId, start, end);
-        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate, endDate);
+        Booking booking = new Booking(bookingId, item, user, BookingState.WAITING, startDate,
+            endDate);
         Booking otherBooking = new Booking(otherBookingId, item, otherUser, BookingState.WAITING,
             otherStartDate, otherEndDate);
 
@@ -636,14 +687,17 @@ public class BookingServiceTest {
         when(itemRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(item));
 
-        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class)))
+        when(bookingRepositoryMock.findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class)))
             .thenReturn(List.of(otherBooking));
 
-        assertThrows(UnacceptableValueException.class, () -> bookingService.addBooking(user.getId(), newBookingRequest));
+        assertThrows(UnacceptableValueException.class,
+            () -> bookingService.addBooking(user.getId(), newBookingRequest));
 
         verify(userRepositoryMock).findById(anyLong());
         verify(itemRepositoryMock).findById(anyLong());
-        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(), any(LocalDateTime.class));
+        verify(bookingRepositoryMock).findAllCurrentAndFutureBookingForItems(anyList(),
+            any(LocalDateTime.class));
         verify(bookingRepositoryMock, never()).save(any(Booking.class));
     }
 
@@ -711,7 +765,8 @@ public class BookingServiceTest {
         when(bookingRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(booking));
 
-        assertThrows(UnacceptableValueException.class, () -> bookingService.approveBooking(user.getId(), bookingId, approved));
+        assertThrows(UnacceptableValueException.class,
+            () -> bookingService.approveBooking(user.getId(), bookingId, approved));
 
         verify(bookingRepositoryMock).findById(anyLong());
         verify(bookingRepositoryMock, never()).save(any(Booking.class));
@@ -740,7 +795,8 @@ public class BookingServiceTest {
         when(bookingRepositoryMock.findById(anyLong()))
             .thenReturn(Optional.of(booking));
 
-        assertThrows(ValidationException.class, () -> bookingService.approveBooking(owner.getId(), bookingId, approved));
+        assertThrows(ValidationException.class,
+            () -> bookingService.approveBooking(owner.getId(), bookingId, approved));
 
         verify(bookingRepositoryMock).findById(anyLong());
         verify(bookingRepositoryMock, never()).save(any(Booking.class));

@@ -1,5 +1,15 @@
 package ru.practicum.shareit.booking;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,19 +22,11 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-
 @DataJpaTest
 @ActiveProfiles("test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingRepositoryTest {
+
     private static final DateTimeFormatter dateTimeFormatter =
         DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneOffset.UTC);
 
@@ -87,7 +89,8 @@ public class BookingRepositoryTest {
         Item item = new Item(0L, owner, name, description, available, null, null, null);
 
         Booking booking1 = new Booking(0L, item, user, state, startDate, endDate);
-        Booking booking2 = new Booking(0L, item, user, state, startDate.plusDays(3), endDate.plusDays(5));
+        Booking booking2 = new Booking(0L, item, user, state, startDate.plusDays(3),
+            endDate.plusDays(5));
 
         User savedUser = userRepository.save(owner);
         assertNotNull(savedUser);
@@ -111,7 +114,8 @@ public class BookingRepositoryTest {
         assertTrue(savedBooking2.getId() > 0);
         bookingId2 = savedBooking2.getId();
 
-        List<Booking> findedBookings = bookingRepository.findPastBookingsByOwner(owner.getId(), LocalDateTime.now());
+        List<Booking> findedBookings = bookingRepository.findPastBookingsByOwner(owner.getId(),
+            LocalDateTime.now());
         assertThat(!findedBookings.isEmpty());
         assertThat(findedBookings.size() == 2);
         Booking findedBooking1 = findedBookings.get(0);
@@ -138,8 +142,10 @@ public class BookingRepositoryTest {
         Item item = new Item(0L, owner, name, description, available, null, null, null);
 
         Booking booking1 = new Booking(0L, item, user, state, startDate, endDate);
-        Booking booking2 = new Booking(0L, item, user, state, startDate.plusDays(3), endDate.plusDays(5));
-        Booking booking3 = new Booking(0L, item, user, BookingState.APPROVED, startDate.plusDays(5), endDate.plusDays(10));
+        Booking booking2 = new Booking(0L, item, user, state, startDate.plusDays(3),
+            endDate.plusDays(5));
+        Booking booking3 = new Booking(0L, item, user, BookingState.APPROVED, startDate.plusDays(5),
+            endDate.plusDays(10));
 
         User savedUser = userRepository.save(owner);
         assertNotNull(savedUser);
@@ -167,7 +173,8 @@ public class BookingRepositoryTest {
         assertNotNull(savedBooking3);
         assertTrue(savedBooking3.getId() > 0);
 
-        List<Booking> findedBookings = bookingRepository.findAllByOwnerWithState(owner.getId(), state);
+        List<Booking> findedBookings = bookingRepository.findAllByOwnerWithState(owner.getId(),
+            state);
         assertThat(!findedBookings.isEmpty());
         assertThat(findedBookings.size() == 2);
         Booking findedBooking1 = findedBookings.get(0);

@@ -1,5 +1,18 @@
 package ru.practicum.shareit.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,18 +25,11 @@ import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    @Mock private UserRepository userRepositoryMock;
+    @Mock
+    private UserRepository userRepositoryMock;
 
     @Mock
     private UserMapper userMapperMock;
@@ -61,7 +67,8 @@ public class UserServiceTest {
         String email = "some_email@mail.com";
         long id = 12L;
 
-        Collection<UserDto> expectedUsers = List.of(UserDto.builder().id(id).name(name).email(email).build());
+        Collection<UserDto> expectedUsers = List.of(
+            UserDto.builder().id(id).name(name).email(email).build());
 
         when(userRepositoryMock.findAll())
             .thenReturn(List.of(new User(id, name, email)));
