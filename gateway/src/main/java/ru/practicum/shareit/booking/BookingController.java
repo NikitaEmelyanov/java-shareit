@@ -75,7 +75,7 @@ public class BookingController {
 
     @GetMapping("/owner")
     public ResponseEntity<Object> getBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
-        @RequestParam(name = "state", required = false, defaultValue = "ALL") String stateParam) {
+        @RequestParam(name = "state", defaultValue = "ALL") String stateParam) {
         log.info("Getting booking by owner with state={} userId={}", stateParam, userId);
         if (Objects.nonNull(stateParam)) {
             BookingStateFilter.from(stateParam)
